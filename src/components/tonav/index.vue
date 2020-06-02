@@ -8,8 +8,10 @@
         <div class="item">|</div>
       </div>
       <div class="box2">
-        <a href class="item" @click.stop.prevent="login">登录</a>
-        <a href class="item" @click.stop.prevent="enroll">注册</a>
+        <a v-if="flag" href class="item" @click.stop.prevent="login">登录</a>
+        <a v-if="flag" href class="item" @click.stop.prevent="enroll">注册</a>
+        <a v-if="!flag" href class="item" @click.stop.prevent="mine">我的</a>
+        <a v-if="!flag" href class="item" @click.stop.prevent="goout">退出</a>
         <div :class="['item']" @click="i=index" v-for="(item,index) in list2" :key="index">
           <a
             :class="{'border':i==index}"
@@ -22,7 +24,7 @@
           <a href @click.stop.prevent="fn">
             <i class="iconfont icon-wangguan"></i>
             会员
-            <div class="item_box" v-show="flag">
+            <div class="item_box" v-show="flag2">
               <div class="item_item">
                 <i class="iconfont icon-wangguan"></i>
                 T豆钱包
@@ -101,12 +103,12 @@ export default {
         "地图",
         "文库"
       ],
-      list2: ["百度贴吧", "我的", "问题反馈"],
-      flag: false,
+      list2: ["百度贴吧", "问题反馈"],
+      flag2: false, //会员二级导航显示隐藏
       dialogVisible: false, //登录窗口的显示隐藏
       enrollVisible: false, //注册窗口的显示隐藏
       ruleForm: {
-        //表单数据
+        //登录表单数据
         username: "",
         password: ""
       },
@@ -138,7 +140,8 @@ export default {
         username: "",
         password: "",
         password2: ""
-      }
+      },
+      flag: true //判断用户是否登录判断是否显示隐藏
     };
   },
   methods: {
@@ -162,20 +165,36 @@ export default {
     // 登录确定事件（登录请求）
     determine() {
       this.$refs.ruleForm.validate(res => {
-        console.log(res);
+        // console.log(res);
         if (res == true) {
-          this.$message({
-            type: "success",
-            message: "恭喜你登录成功"
-          });
+          console.log(this.ruleForm);
           this.dialogVisible = false;
-          this.$refs.ruleForm.resetFields();
+          let res = JSON.stringify(this.ruleForm);
+          console.log(res);
+          localStorage.setItem("user", res); //将登录信息存储中本地存储中
+          const loading = this.$loading({
+            //加载效果
+            lock: true,
+            text: "Loading",
+            spinner: "el-icon-loading",
+            background: "rgba(0, 0, 0, 0.7)"
+          });
+          setTimeout(() => {
+            this.$message({
+              type: "success",
+              message: "恭喜你登录成功"
+            });
+            this.check();
+            loading.close(); //关闭加载效果
+            this.$emit("fn"); //触发父组件的方法
+          }, 2000);
         }
       });
     },
     // 点注册显示按钮
     enroll() {
       this.enrollVisible = true;
+      toString;
     },
     // 取消注册事件
     enrollcancel() {
@@ -191,11 +210,46 @@ export default {
             type: "success",
             message: "注册成功"
           });
+
           this.enrollVisible = false;
           this.$refs.enrollForm.resetFields();
         }
       });
+    },
+    // 跳转到我的页面事件
+    mine() {
+      this.$router.push("/mine");
+    },
+    // 查看本地存储中是否有用户数据
+    check() {
+      let res = localStorage.getItem("user") || [];
+      if (res.length == 0) {
+        this.flag = true;
+        return;
+      }
+      this.flag = false;
+    },
+    // 退出事件
+    goout() {
+      const loading = this.$loading({
+        lock: true,
+        text: "退出中。。。",
+        spinner: "el-icon-loading",
+        background: "#fff"
+      });
+      localStorage.clear(); //清除localStorage中的数据
+      setTimeout(() => {
+        this.check();
+        this.$message("你退出了拍拍论坛");
+        loading.close(); //关闭加载动画
+      }, 2000);
+
+      this.$emit("fn");
+      //加载动画隐藏
     }
+  },
+  mounted() {
+    this.check(); //查看本地存储中是否有用户数据
   }
 };
 </script>

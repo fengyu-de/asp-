@@ -1,5 +1,6 @@
 <template>
   <div>
+    {{$route.params.id}}
     <ToNav></ToNav>
     <el-page-header @back="goBack" content="详情页面"></el-page-header>
     <div class="border_top"></div>
@@ -40,6 +41,14 @@
       <el-col :span="5">
         <i @click="dainzan" :class="['iconfont', 'icon-dianzan',{'color':flag}]"></i>
         {{num}}
+        <p>评分：</p>
+        <el-rate
+          v-model="value"
+          disabled
+          show-score
+          text-color="#ff9900"
+          score-template="{value},分"
+        ></el-rate>
       </el-col>
     </el-row>
     <el-row type="flex" justify="center">
@@ -66,7 +75,8 @@ export default {
     return {
       time: new Date(),
       flag: false, //控制点赞图标颜色
-      num: 30
+      num: 30,
+      value: 5 //评分值
     };
   },
   created() {},

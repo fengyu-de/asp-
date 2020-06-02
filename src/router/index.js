@@ -47,15 +47,17 @@ const routes = [{
         path: 'girl',
         component: () => import('@/views/home-girl/index')
       }
-
     ]
   },
   {
     path: "/articleinfo",
     name: 'ArticleInfo',
     component: () => import('@/views/articleinfo/index')
+  },
+  {
+    path: '/mine',
+    component: () => import("@/views/mine/index")
   }
-
 ]
 
 const router = new VueRouter({
